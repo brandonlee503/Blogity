@@ -15,9 +15,13 @@ $mysql_handle = mysql_connect($dbhost, $dbuser, $dbpass)
 mysql_select_db($dbname, $mysql_handle)
     or die("Error selecting database: $dbname");
 
+echo 'Successfully connected to database!';
+
 //Get username and password
 $username = $_REQUEST["username"];
 $password = $_REQUEST["password"];
+echo $username;
+echo $password;
 
 //Cleans username input
 $cleanUser = mysql_real_escape_string($username);
@@ -28,27 +32,19 @@ $cleanPass = mysql_real_escape_string(base64_encode(hash('sha256',$password)));
 
 //Queries to find user in database
 $userRow = mysql_query("SELECT * FROM userprofiles WHERE username = '$cleanUser' AND password = '$cleanPass'")
-    or die(mysql_error());
-
-//Fetch row and create into array
-$row = mysql_fetch_array($userRow);
-
-//Check cid for valid account info
-if(strlen($row[0]) < 1){
-    die ('Invalid Username or Password');
+    or die('Invalid Username or Password'.mysql_error());
+//might not need...
+if(!$userRow){
+    echo 'Invalid Username or Password' . mysql_error();
+    exit;
 }
 
-//Create session variables
-$_SESSION['cid'] = $row[0];
-$_SESSION['username'] = $row[1];
-$_SESSION['firstname'] = $row[2];
-$_SESSION['lastname'] = $row[3];
-$_SESSION['email'] = $row[6];
-$_SESSION['status'] = $row[7];
-$_SESSION['profilePic'] = $row[8];
+$row = mysql_fetch_array($userRow);
+echo "User's username: $row[1], User's email: $row[6]";
 
-//Redirect to user homepage
-header("Location: http://people.oregonstate.edu/~leebran/CS%20290%20Final%20Project/homepage.php");
+echo "Here is the session username: ";
+echo $_SESSION["username"];
+
 
 mysql_close($mysql_handle);
 ?>
